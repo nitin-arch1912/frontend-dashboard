@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Hindu College ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f9fafb;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --text-light: #6b7280;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text-light: #cbd5e1;
+        }
+
+        .dashboard-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            width: 260px;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-logo {
+            font-family: 'Sora', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 3rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 3rem;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            gap: 2rem;
+        }
+
+        .navbar-left {
+            flex: 0;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.8rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-light);
+        }
+
+        .search-bar::before {
+            content: '🔍';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.25rem;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .icon-btn:hover {
+            color: var(--primary);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-left: 2.5rem;
+            border-left: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            padding: 3rem 4rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        /* ===== METRIC GRID ===== */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.2rem;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .metric-icon {
+            font-size: 2.8rem;
+            margin-bottom: 1.2rem;
+            display: block;
+        }
+
+        .metric-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.8rem;
+        }
+
+        .metric-value {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Sora', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-subtext {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* ===== CHARTS GRID ===== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-family: 'Sora', sans-serif;
+            color: var(--text);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* ===== SECTION CARDS ===== */
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+
+        .section-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-card h3 {
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-family: 'Sora', sans-serif;
+            color: var(--text);
+        }
+
+        /* ===== TABLES ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--bg);
+            padding: 1.2rem;
+            text-align: left;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-bottom: 2px solid var(--border);
+            font-family: 'Sora', sans-serif;
+        }
+
+        tbody td {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        tbody tr:hover {
+            background: var(--bg);
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        /* ===== ANNOUNCEMENTS ===== */
+        .announcement-item {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.05));
+            border-left: 4px solid var(--primary);
+            padding: 1.8rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .announcement-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
+        }
+
+        .announcement-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .announcement-title {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            font-family: 'Sora', sans-serif;
+            font-size: 1.05rem;
+        }
+
+        .announcement-text {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 100;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 2rem 2.5rem;
+            }
+
+            .navbar {
+                padding: 1rem 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .navbar-left {
+                width: 100%;
+            }
+
+            .search-bar {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .navbar-right {
+                width: 100%;
+                margin-left: 0;
+                gap: 1.5rem;
+                justify-content: space-between;
+            }
+
+            .user-profile {
+                padding-left: 1.5rem;
+                gap: 0.8rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .metric-card {
+                padding: 1.8rem;
+            }
+
+            .section-card {
+                padding: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 1.5rem;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .metric-icon {
+                font-size: 2.2rem;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                🎓<br>Hindu College<br>of Engineering
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
+                <div class="nav-item" data-section="profile">👤 Profile</div>
+                <div class="nav-item" data-section="attendance">✅ Attendance</div>
+                <div class="nav-item" data-section="results">📈 Results</div>
+                <div class="nav-item" data-section="fees">💳 Fees</div>
+                <div class="nav-item" data-section="documents">📄 Documents</div>
+                <div class="nav-item" data-section="ai">🤖 AI Assistant</div>
+                <div class="nav-item" data-section="notifications">🔔 Notifications</div>
+                <div class="nav-item" data-section="settings">⚙️ Settings</div>
+                <div class="nav-item" onclick="logout()" style="margin-top: 2rem; color: var(--danger);">🚪 Logout</div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- NAVBAR -->
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <button class="icon-btn" onclick="toggleNotifications()">
+                        🔔
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" onclick="toggleDarkMode()">🌙</button>
+                    <div class="user-profile">
+                        <div class="user-avatar">S</div>
+                        <div class="user-name">Sneha</div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <!-- DASHBOARD SECTION -->
+                <section id="dashboard-section" class="section active">
+                    <h1 class="page-title">Welcome Back, Sneha! 👋</h1>
+                    <p class="page-subtitle">Here's your academic overview for this semester</p>
+
+                    <!-- Metrics -->
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <span class="metric-icon">🎓</span>
+                            <div class="metric-label">Current CGPA</div>
+                            <div class="metric-value">8.5</div>
+                            <div class="metric-subtext">Out of 10.0</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">✅</span>
+                            <div class="metric-label">Attendance</div>
+                            <div class="metric-value">92%</div>
+                            <div class="metric-subtext">77 out of 80 classes</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">💳</span>
+                            <div class="metric-label">Pending Fees</div>
+                            <div class="metric-value">₹5K</div>
+                            <div class="metric-subtext">Due by March 30</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">📚</span>
+                            <div class="metric-label">Enrolled Courses</div>
+                            <div class="metric-value">6</div>
+                            <div class="metric-subtext">This semester</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>📊 Attendance Trend</h3>
+                            <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>📈 Subject Performance</h3>
+                            <div class="chart-container"><canvas id="performanceChart"></canvas></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>🎯 Grade Distribution</h3>
+                            <div class="chart-container"><canvas id="gradeChart"></canvas></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>📉 Performance Trend</h3>
+                            <div class="chart-container"><canvas id="radarChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Announcements -->
+                    <div class="section-card">
+                        <h3>📢 Latest Announcements</h3>
+                        <div class="announcement-item">
+                            <div class="announcement-date">🔴 NEW • March 5, 2024</div>
+                            <div class="announcement-title">Mid-Semester Exams Scheduled</div>
+                            <div class="announcement-text">Mid-semester examinations will begin from March 18, 2024. Check your exam schedule in the Results section for more details and timings.</div>
+                        </div>
+                        <div class="announcement-item">
+                            <div class="announcement-date">🔴 NEW • March 3, 2024</div>
+                            <div class="announcement-title">Semester Fees Payment Due</div>
+                            <div class="announcement-text">Please complete your fees payment by March 31st to avoid late charges and penalties on your account.</div>
+                        </div>
+                        <div class="announcement-item">
+                            <div class="announcement-date">⚪ • Feb 28, 2024</div>
+                            <div class="announcement-title">New Library Timings</div>
+                            <div class="announcement-text">Library is open from 8 AM to 10 PM on weekdays. Saturday: 10 AM to 6 PM. Closed on Sundays for maintenance.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PROFILE SECTION -->
+                <section id="profile-section" class="section">
+                    <h1 class="page-title">My Profile</h1>
+                    <p class="page-subtitle">Your personal academic information</p>
+
+                    <div class="metric-grid" style="grid-template-columns: 1fr;">
+                        <div class="metric-card">
+                            <div style="display: grid; grid-template-columns: auto 1fr; gap: 2.5rem;">
+                                <div class="user-avatar" style="width: 90px; height: 90px; font-size: 2.5rem;">S</div>
+                                <div>
+                                    <h2 style="font-family: 'Sora', sans-serif; font-size: 1.6rem; margin-bottom: 0.5rem;">Sneha Sharma</h2>
+                                    <p style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 1rem;">Computer Science Engineer | 3rd Year</p>
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                                        <div>
+                                            <span style="color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Student ID</span>
+                                            <p style="font-weight: 600; color: var(--primary); margin-top: 0.6rem; font-size: 1.05rem;">STU2024001</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Department</span>
+                                            <p style="font-weight: 600; margin-top: 0.6rem; font-size: 1.05rem;">CSE</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Semester</span>
+                                            <p style="font-weight: 600; margin-top: 0.6rem; font-size: 1.05rem;">6th</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Roll Number</span>
+                                            <p style="font-weight: 600; margin-top: 0.6rem; font-size: 1.05rem;">2024-CSE-001</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Email Address</div>
+                            <p style="font-weight: 500; margin-top: 1rem; font-size: 1rem;">sneha.sharma@hce.edu.in</p>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Phone Number</div>
+                            <p style="font-weight: 500; margin-top: 1rem; font-size: 1rem;">+91 98765 43210</p>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Date of Birth</div>
+                            <p style="font-weight: 500; margin-top: 1rem; font-size: 1rem;">January 15, 2005</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ATTENDANCE SECTION -->
+                <section id="attendance-section" class="section">
+                    <h1 class="page-title">Attendance Tracking</h1>
+                    <p class="page-subtitle">Overall: <strong style="color: var(--primary);">92%</strong></p>
+
+                    <div class="section-card">
+                        <h3>Subject-wise Attendance</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Classes Held</th>
+                                    <th>Classes Attended</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 500;">Data Structures</td>
+                                    <td>20</td>
+                                    <td>19</td>
+                                    <td style="color: var(--primary); font-weight: 600;">95%</td>
+                                    <td><span class="badge badge-success">✓ Present</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Web Development</td>
+                                    <td>20</td>
+                                    <td>18</td>
+                                    <td style="color: var(--primary); font-weight: 600;">90%</td>
+                                    <td><span class="badge badge-success">✓ Present</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Database Systems</td>
+                                    <td>20</td>
+                                    <td>18</td>
+                                    <td style="color: var(--primary); font-weight: 600;">90%</td>
+                                    <td><span class="badge badge-success">✓ Present</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Computer Networks</td>
+                                    <td>20</td>
+                                    <td>16</td>
+                                    <td style="color: var(--warning); font-weight: 600;">80%</td>
+                                    <td><span class="badge badge-warning">⚠ Low</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Operating Systems</td>
+                                    <td>20</td>
+                                    <td>17</td>
+                                    <td style="color: var(--primary); font-weight: 600;">85%</td>
+                                    <td><span class="badge badge-success">✓ Present</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Software Engineering</td>
+                                    <td>20</td>
+                                    <td>20</td>
+                                    <td style="color: var(--success); font-weight: 600;">100%</td>
+                                    <td><span class="badge badge-success">✓ Perfect</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- RESULTS SECTION -->
+                <section id="results-section" class="section">
+                    <h1 class="page-title">Academic Results</h1>
+                    <p class="page-subtitle">Semester 6 Performance</p>
+
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <span class="metric-icon">📊</span>
+                            <div class="metric-label">Semester SGPA</div>
+                            <div class="metric-value">8.7</div>
+                            <div class="metric-subtext">Semester Grade Point</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">🎯</span>
+                            <div class="metric-label">Cumulative CGPA</div>
+                            <div class="metric-value">8.5</div>
+                            <div class="metric-subtext">Overall Performance</div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Semester 6 Results</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Marks</th>
+                                    <th>Out of</th>
+                                    <th>Percentage</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 500;">Data Structures</td>
+                                    <td>87</td>
+                                    <td>100</td>
+                                    <td style="color: var(--primary);">87%</td>
+                                    <td><span class="badge badge-info">A</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Web Development</td>
+                                    <td>92</td>
+                                    <td>100</td>
+                                    <td style="color: var(--success);">92%</td>
+                                    <td><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">A+</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Database Systems</td>
+                                    <td>85</td>
+                                    <td>100</td>
+                                    <td style="color: var(--primary);">85%</td>
+                                    <td><span class="badge badge-info">A</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Computer Networks</td>
+                                    <td>78</td>
+                                    <td>100</td>
+                                    <td style="color: var(--primary);">78%</td>
+                                    <td><span class="badge badge-warning">B+</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Operating Systems</td>
+                                    <td>88</td>
+                                    <td>100</td>
+                                    <td style="color: var(--primary);">88%</td>
+                                    <td><span class="badge badge-info">A</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">Software Engineering</td>
+                                    <td>91</td>
+                                    <td>100</td>
+                                    <td style="color: var(--success);">91%</td>
+                                    <td><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">A+</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- FEES SECTION -->
+                <section id="fees-section" class="section">
+                    <h1 class="page-title">Fee Management</h1>
+                    <p class="page-subtitle">Track your payments and dues</p>
+
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <span class="metric-icon">💰</span>
+                            <div class="metric-label">Total Fees</div>
+                            <div class="metric-value">₹1.5L</div>
+                            <div class="metric-subtext">For semester</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">✅</span>
+                            <div class="metric-label">Paid Amount</div>
+                            <div class="metric-value" style="color: var(--success);">₹1.45L</div>
+                            <div class="metric-subtext">96.7% Paid</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">⚠️</span>
+                            <div class="metric-label">Pending Dues</div>
+                            <div class="metric-value" style="color: var(--danger);">₹5K</div>
+                            <div class="metric-subtext">Due by Mar 30</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-icon">📅</span>
+                            <div class="metric-label">Last Payment</div>
+                            <div class="metric-value" style="font-size: 1.6rem;">Dec 10</div>
+                            <div class="metric-subtext">2023</div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Payment History</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 500;">TXN-2024-0001</td>
+                                    <td>₹75,000</td>
+                                    <td>June 15, 2023</td>
+                                    <td>Online Transfer</td>
+                                    <td><span class="badge badge-success">✓ Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">TXN-2024-0002</td>
+                                    <td>₹70,000</td>
+                                    <td>December 10, 2023</td>
+                                    <td>Online Transfer</td>
+                                    <td><span class="badge badge-success">✓ Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">TXN-2024-0003</td>
+                                    <td>₹5,000</td>
+                                    <td>Pending</td>
+                                    <td>Online Transfer</td>
+                                    <td><span class="badge badge-warning">⏳ Pending</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- DOCUMENTS SECTION -->
+                <section id="documents-section" class="section">
+                    <h1 class="page-title">Documents</h1>
+                    <p class="page-subtitle">Manage your academic documents</p>
+
+                    <div style="margin-bottom: 2.5rem;">
+                        <button class="btn btn-primary">📤 Upload Document</button>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>My Documents</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Size</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 500;">📄 ID Card</td>
+                                    <td>PDF</td>
+                                    <td>Feb 10, 2024</td>
+                                    <td>2.5 MB</td>
+                                    <td style="color: var(--primary); cursor: pointer; font-weight: 600;">📥 Download</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">📄 Academic Certificate</td>
+                                    <td>PDF</td>
+                                    <td>Jan 20, 2024</td>
+                                    <td>1.8 MB</td>
+                                    <td style="color: var(--primary); cursor: pointer; font-weight: 600;">📥 Download</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">📄 Medical Certificate</td>
+                                    <td>PDF</td>
+                                    <td>Mar 1, 2024</td>
+                                    <td>0.9 MB</td>
+                                    <td style="color: var(--primary); cursor: pointer; font-weight: 600;">📥 Download</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- AI ASSISTANT SECTION -->
+                <section id="ai-section" class="section">
+                    <h1 class="page-title">AI Assistant 🤖</h1>
+                    <p class="page-subtitle">Ask anything about your academics</p>
+
+                    <div class="section-card">
+                        <h3>Chat with Assistant</h3>
+                        <div id="chatBox" style="height: 380px; overflow-y: auto; background: var(--bg); border-radius: 8px; padding: 1.8rem; margin-bottom: 2rem; border: 1px solid var(--border);">
+                            <div style="background: rgba(99, 102, 241, 0.1); padding: 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid var(--primary);">
+                                <strong style="color: var(--primary);">Assistant:</strong>
+                                <p style="margin-top: 0.6rem; color: var(--text);">Hello! I'm here to help answer questions about your academics. What would you like to know?</p>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 2rem;">
+                            <button onclick="askChatbot('What is my CGPA?')" style="padding: 0.8rem; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: 500; font-family: 'Nunito', sans-serif; transition: all 0.3s;">📊 My CGPA?</button>
+                            <button onclick="askChatbot('What is my attendance?')" style="padding: 0.8rem; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: 500; font-family: 'Nunito', sans-serif; transition: all 0.3s;">✅ Attendance?</button>
+                            <button onclick="askChatbot('Do I have pending fees?')" style="padding: 0.8rem; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: 500; font-family: 'Nunito', sans-serif; transition: all 0.3s;">💰 Pending Fees?</button>
+                            <button onclick="askChatbot('What are my exam dates?')" style="padding: 0.8rem; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: 500; font-family: 'Nunito', sans-serif; transition: all 0.3s;">📅 Exams?</button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 1.2rem;">
+                            <input type="text" id="chatInput" placeholder="Ask anything..." style="padding: 0.9rem 1.2rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 0.95rem;">
+                            <button onclick="sendChat()" style="padding: 0.9rem 2.2rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Nunito', sans-serif; transition: all 0.3s;">Send</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- NOTIFICATIONS SECTION -->
+                <section id="notifications-section" class="section">
+                    <h1 class="page-title">Notifications</h1>
+                    <p class="page-subtitle">Your announcements and alerts</p>
+
+                    <div class="announcement-item">
+                        <div class="announcement-date">🔴 NEW • March 5, 2024</div>
+                        <div class="announcement-title">Mid-Semester Exams Scheduled</div>
+                        <div class="announcement-text">Mid-semester examinations will begin from March 18, 2024. Check your exam schedule in Results section for full details and timings.</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-date">🔴 NEW • March 3, 2024</div>
+                        <div class="announcement-title">Semester Fees Payment Reminder</div>
+                        <div class="announcement-text">Please complete your semester fees payment by March 31st to avoid late charges and penalties.</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-date">⚪ • March 1, 2024</div>
+                        <div class="announcement-title">Class Timings Change</div>
+                        <div class="announcement-text">New class timings are effective from March 1st. Check your updated schedule on the student portal.</div>
+                    </div>
+                </section>
+
+                <!-- SETTINGS SECTION -->
+                <section id="settings-section" class="section">
+                    <h1 class="page-title">Settings</h1>
+                    <p class="page-subtitle">Customize your experience</p>
+
+                    <div class="section-card">
+                        <h3>Appearance</h3>
+                        <div style="padding: 1.5rem 0;">
+                            <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer; margin-bottom: 1.5rem; font-size: 1rem;">
+                                <input type="radio" name="theme" checked onchange="applyTheme('light')">
+                                <span>Light Mode ☀️</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer; font-size: 1rem;">
+                                <input type="radio" name="theme" onchange="applyTheme('dark')">
+                                <span>Dark Mode 🌙</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Notification Preferences</h3>
+                        <div style="padding: 1.5rem 0; display: flex; flex-direction: column; gap: 1.2rem;">
+                            <label style="display: flex; align-items: center; gap: 1rem; font-size: 1rem;">
+                                <input type="checkbox" checked>
+                                <span>Email Notifications</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 1rem; font-size: 1rem;">
+                                <input type="checkbox" checked>
+                                <span>Fee Reminders</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 1rem; font-size: 1rem;">
+                                <input type="checkbox" checked>
+                                <span>Exam Alerts</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 1rem; font-size: 1rem;">
+                                <input type="checkbox">
+                                <span>Attendance Notifications</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication
+        if (!localStorage.getItem('auth')) {
+            window.location.href = 'login.html';
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item:not([onclick])').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section + '-section').classList.add('active');
+                
+                document.querySelectorAll('.nav-item:not([onclick])').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                if (section === 'dashboard') {
+                    setTimeout(initCharts, 100);
+                }
+            });
+        });
+
+        // Dark Mode
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) document.body.classList.add('dark-mode');
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', darkMode);
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('auth');
+            window.location.href = 'login.html';
+        }
+
+        // Notifications
+        function toggleNotifications() {
+            alert('You have 3 new notifications!');
+        }
+
+        // Charts
+        let charts = {};
+        function initCharts() {
+            if (charts.attendance) charts.attendance.destroy();
+            const ctx1 = document.getElementById('attendanceChart');
+            if (ctx1) {
+                charts.attendance = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Attendance %',
+                            data: [85, 88, 90, 92, 92, 92],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } } }
+                });
+            }
+
+            if (charts.performance) charts.performance.destroy();
+            const ctx2 = document.getElementById('performanceChart');
+            if (ctx2) {
+                charts.performance = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['DSA', 'Web', 'DB', 'Networks', 'OS', 'SE'],
+                        datasets: [{ label: 'Marks', data: [87, 92, 85, 78, 88, 91], backgroundColor: '#6366f1' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            if (charts.grade) charts.grade.destroy();
+            const ctx3 = document.getElementById('gradeChart');
+            if (ctx3) {
+                charts.grade = new Chart(ctx3, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['A+', 'A', 'B+'],
+                        datasets: [{ data: [40, 40, 20], backgroundColor: ['#10b981', '#6366f1', '#f59e0b'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            if (charts.radar) charts.radar.destroy();
+            const ctx4 = document.getElementById('radarChart');
+            if (ctx4) {
+                charts.radar = new Chart(ctx4, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Sem 4', 'Sem 5', 'Sem 6'],
+                        datasets: [{ label: 'CGPA', data: [8.0, 8.3, 8.5], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        initCharts();
+
+        // Chat
+        function askChatbot(q) {
+            document.getElementById('chatInput').value = q;
+            sendChat();
+        }
+
+        function sendChat() {
+            const msg = document.getElementById('chatInput').value.trim();
+            if (!msg) return;
+
+            const box = document.getElementById('chatBox');
+            box.innerHTML += `<div style="background: rgba(99, 102, 241, 0.15); padding: 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: right; border-right: 4px solid var(--primary);"><strong style="color: var(--primary);">You:</strong> <p style="margin-top: 0.6rem; color: var(--text);">${msg}</p></div>`;
+            document.getElementById('chatInput').value = '';
+
+            setTimeout(() => {
+                let response = 'Great question!';
+                if (msg.includes('CGPA') || msg.includes('cgpa')) response = 'Your current CGPA is 8.5 🎓';
+                else if (msg.includes('attendance')) response = 'Your attendance is 92% (77/80 classes) ✅';
+                else if (msg.includes('fees')) response = 'You have ₹5,000 pending fees due by March 30 💳';
+                else if (msg.includes('exam')) response = 'Mid-semester exams start from March 18, 2024 📅';
+                
+                box.innerHTML += `<div style="background: rgba(99, 102, 241, 0.1); padding: 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; border-left: 4px solid var(--primary);"><strong style="color: var(--primary);">Assistant:</strong> <p style="margin-top: 0.6rem; color: var(--text);">${response}</p></div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 300);
+        }
+    </script>
+</body>
+</html>
